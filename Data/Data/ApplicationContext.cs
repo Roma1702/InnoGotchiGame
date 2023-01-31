@@ -18,9 +18,8 @@ namespace DataAccessLayer.Data
     {
         public DbSet<Farm>? Farms { get; set; }
         public DbSet<Innogotchi>? Pets { get; set; }
+        public DbSet<InnogotchiPart>? InnogotchiParts { get; set; }
         public DbSet<InnogotchiState>? InnogotchiStates { get; set; }
-        public DbSet<MediaInnogotchiPart>? MediaInnogotchiParts { get;set; }
-        public DbSet<MediaUser>? MediaUsers { get; set; }
         public DbSet<UserFriend>? UserFriends { get; set; }
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {

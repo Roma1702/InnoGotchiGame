@@ -1,4 +1,4 @@
-﻿using static Entities.Entity.InnogotchiState;
+﻿using static Contracts.Enum.Enums;
 
 namespace Models.Core;
 
@@ -10,5 +10,6 @@ public class InnogotchiStateDto
     public int Age { get; set; }
     public HungerLevel Hunger { get; set; }
     public ThirstyLevel Thirsty { get; set; }
+    public DateTimeOffset Created { get; set; }
     public int HappyDays { get; set; }
 }

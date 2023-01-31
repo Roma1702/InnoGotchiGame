@@ -18,19 +18,22 @@ public class InnogotchiConfiguration : IEntityTypeConfiguration<Innogotchi>
             .HasForeignKey<InnogotchiState>(x => x.InnogotchiId);
 
         builder.HasOne(x => x.Body)
-            .WithMany(x => x.Pets)
-            .HasForeignKey(x => x.BodyId);
+            .WithMany(x => x.Bodies)
+            .HasForeignKey(x => x.BodyId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.Nose)
-            .WithMany(x => x.Pets)
-            .HasForeignKey(x => x.NoseId);
+            .WithMany(x => x.Noses)
+            .HasForeignKey(x => x.NoseId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.Eyes)
-            .WithMany(x => x.Pets)
-            .HasForeignKey(x => x.EyesId);
+            .WithMany(x => x.Eyes)
+            .HasForeignKey(x => x.EyesId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.Mouth)
-            .WithMany(x => x.Pets)
+            .WithMany(x => x.Mouths)
             .HasForeignKey(x => x.MouthId);
     }
 }
