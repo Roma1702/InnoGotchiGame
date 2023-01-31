@@ -5,10 +5,13 @@ namespace DataAccessLayer.Repository.DependencyInject;
 
 public static class RepositoryProvider
 {
-    public static void Provide(IServiceCollection services)
+    public static void RepositoriesProvide(this IServiceCollection services)
     {
         services.AddTransient<IUserRepository, UserRepository>();
         services.AddTransient<IFarmRepository, FarmRepository>();
         services.AddTransient<IInnogotchiRepository, InnogotchiRepository>();
+        services.AddTransient<IInnogotchiStateRepository, InnogotchiStateRepository>();
+        services.AddTransient<IInnogotchiPartRepository, InnogotchiPartRepository>();
+        services.AddTransient<IUserFriendRepository, UserFriendRepository>();
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Entities.Entity;
+﻿using static Contracts.Enum.Enums;
+
+namespace Entities.Entity;
 
 public class InnogotchiState
 {
@@ -8,19 +10,6 @@ public class InnogotchiState
     public ThirstyLevel Thirsty { get; set; }
     public Guid InnogotchiId { get; set; }
     public int HappyDays { get; set; }
-    public Innogotchi? Innogotchi { get; set; }
-    public enum HungerLevel
-    {
-        Full,
-        Normal,
-        Hunger,
-        Dead
-    }
-    public enum ThirstyLevel
-    {
-        Full,
-        Normal,
-        Thirsty,
-        Dead
-    }
+    public DateTimeOffset Created { get; set; }
+    public virtual Innogotchi? Innogotchi { get; set; }
 }

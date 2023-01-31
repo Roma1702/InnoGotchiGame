@@ -40,10 +40,14 @@ public class InnogotchiRepository : IInnogotchiRepository
         }
     }
 
-    public async Task<InnogotchiDto> GetById(Guid id)
+    public async Task<InnogotchiDto> GetByIdAsync(Guid id)
     {
         var innogotchi = await _dbSet.AsNoTracking()
             .Include(x => x.InnogotchiState)
+            .Include(x => x.Body)
+            .Include(x => x.Nose)
+            .Include(x => x.Eyes)
+            .Include(x => x.Mouth)
             .FirstOrDefaultAsync(x => x.Id == id);
 
         var innogotchiDto = _mapper.Map<InnogotchiDto>(innogotchi);
@@ -51,13 +55,15 @@ public class InnogotchiRepository : IInnogotchiRepository
         return innogotchiDto;
     }
 
-    public async Task<List<InnogotchiDto>> GetChunkAsync(int number, int size)
+    public async Task<List<InnogotchiDto>?> GetChunkAsync(int number, int size)
     {
         var pets = await _dbSet.AsNoTracking()
             .Include(x => x.InnogotchiState)
             .Skip(number * size)
             .Take(size)
             .ToListAsync();
+
+        if (pets is null) return null;
 
         var petsDto = _mapper.Map<List<InnogotchiDto>>(pets);
 

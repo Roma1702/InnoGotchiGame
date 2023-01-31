@@ -14,10 +14,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(x => x.Email)
             .IsUnique();
 
-        builder.HasOne(x => x.Photo)
-            .WithMany(x => x.Users)
-            .HasForeignKey(x => x.PhotoId);
-
         builder.HasOne(x => x.Farm)
             .WithOne(x => x.User)
             .HasForeignKey<Farm>(x => x.UserId);
