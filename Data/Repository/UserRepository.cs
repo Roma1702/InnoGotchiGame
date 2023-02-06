@@ -174,12 +174,13 @@ public class UserRepository : IUserRepository
             }
         }
     }
-    public async Task<User?> GetUser(ShortUserDto userDto)
+    public async Task<User?> GetUserAsync(ShortUserDto userDto)
     {
         var mapUser = _mapper.Map<User>(userDto);
 
         var user = await _dbSet.AsNoTracking()
-            .Include(x => x.Farm)
+            .Include(x => x.Farm!)
+            .ThenInclude(x => x.Pets)
             .FirstOrDefaultAsync(x => x.UserName == mapUser.UserName);
 
         return user;

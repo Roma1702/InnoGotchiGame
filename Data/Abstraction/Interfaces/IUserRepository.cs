@@ -12,5 +12,5 @@ public interface IUserRepository
     public Task UpdateAsync(Guid id, ShortUserDto userDto);
     public Task UpdatePasswordAsync(Guid id, ChangePasswordDto changePasswordDto);
     public Task DeleteAsync(Guid id);
-    public Task<User?> GetUser(ShortUserDto userDto);
+    public Task<User?> GetUserAsync(ShortUserDto userDto);
 }

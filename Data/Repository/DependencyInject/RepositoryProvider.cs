@@ -10,8 +10,7 @@ public static class RepositoryProvider
         services.AddTransient<IUserRepository, UserRepository>();
         services.AddTransient<IFarmRepository, FarmRepository>();
         services.AddTransient<IInnogotchiRepository, InnogotchiRepository>();
-        services.AddTransient<IInnogotchiStateRepository, InnogotchiStateRepository>();
-        services.AddTransient<IInnogotchiPartRepository, InnogotchiPartRepository>();
         services.AddTransient<IUserFriendRepository, UserFriendRepository>();
+        services.AddTransient<IInnogotchiStateRepository, InnogotchiStateRepository>();
     }
 }

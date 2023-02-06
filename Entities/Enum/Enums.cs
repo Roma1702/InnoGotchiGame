@@ -1,26 +1,33 @@
-﻿namespace Contracts.Enum;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Contracts.Enum;
 
 public class Enums
 {
     public enum HungerLevel
     {
-        Full,
-        Normal,
-        Hunger,
-        Dead
+        Full = 1,
+        Normal = 2,
+        Hunger = 3,
+        Dead = 4
     }
     public enum ThirstyLevel
     {
-        Full,
-        Normal,
-        Thirsty,
-        Dead
+        Full = 1,
+        Normal = 2,
+        Thirsty = 3,
+        Dead = 4
     }
     public enum PartType
     {
-        Body,
-        Eyes,
-        Mouth,
-        Nose
+        Body = 1,
+        Eyes = 2,
+        Mouth = 3,
+        Nose = 4
+    }
+    public enum MealType
+    {
+        Feeding,
+        Drinking
     }
 }
