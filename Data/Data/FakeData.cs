@@ -44,40 +44,40 @@ public static class FakeData
         }
     };
 
+    public static ICollection<Innogotchi> Pets = new List<Innogotchi>
+    {
+        new Innogotchi
+        {
+            Name = "Perry",
+            Farm = Farms?.First()
+        }
+    };
+
     public static ICollection<InnogotchiPart> InnogotchiParts = new List<InnogotchiPart>()
     {
         new InnogotchiPart
         {
             Image = File.ReadAllBytes(@"wwwroot/Images/Bodies/body1.svg"),
             PartType = PartType.Body,
+            Innogotchi = Pets.First()
         },
         new InnogotchiPart
         {
             Image = File.ReadAllBytes(@"wwwroot/Images/Eyes/eyes1.svg"),
-            PartType = PartType.Eyes
+            PartType = PartType.Eyes,
+            Innogotchi = Pets.First()
         },
         new InnogotchiPart
         {
             Image = File.ReadAllBytes(@"wwwroot/Images/Mouths/mouth1.svg"),
-            PartType = PartType.Mouth
+            PartType = PartType.Mouth,
+            Innogotchi = Pets.First()
         },
         new InnogotchiPart
         {
             Image = File.ReadAllBytes(@"wwwroot/Images/Noses/nose1.svg"),
-            PartType = PartType.Nose
-        }
-    };
-
-    public static ICollection<Innogotchi> Pets = new List<Innogotchi>
-    {
-        new Innogotchi
-        {
-            Name = "Perry",
-            Farm = Farms?.First(),
-            Body = InnogotchiParts.First(x => x.PartType == PartType.Body),
-            Nose = InnogotchiParts.First(x => x.PartType == PartType.Nose),
-            Eyes = InnogotchiParts.First(x => x.PartType == PartType.Eyes),
-            Mouth = InnogotchiParts.First(x => x.PartType == PartType.Mouth)
+            PartType = PartType.Nose,
+            Innogotchi = Pets.First()
         }
     };
 
@@ -115,11 +115,12 @@ public static class FakeData
     {
         new InnogotchiState
         {
-            Age = 1,
-            Hunger = HungerLevel.Full,
-            Thirsty =ThirstyLevel.Full,
-            HappyDays = 2,
-            Created = DateTimeOffset.Now.AddDays(-2),
+            Age = 0,
+            Hunger = HungerLevel.Normal,
+            Thirsty = ThirstyLevel.Normal,
+            StartOfHappinessDays = DateTimeOffset.Now,
+            HappinessDays = 0,
+            Created = DateTimeOffset.Now,
             Innogotchi = Pets!.First()
         }
     };

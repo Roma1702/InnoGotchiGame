@@ -17,23 +17,8 @@ public class InnogotchiConfiguration : IEntityTypeConfiguration<Innogotchi>
             .WithOne(x => x.Innogotchi)
             .HasForeignKey<InnogotchiState>(x => x.InnogotchiId);
 
-        builder.HasOne(x => x.Body)
-            .WithMany(x => x.Bodies)
-            .HasForeignKey(x => x.BodyId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(x => x.Nose)
-            .WithMany(x => x.Noses)
-            .HasForeignKey(x => x.NoseId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(x => x.Eyes)
-            .WithMany(x => x.Eyes)
-            .HasForeignKey(x => x.EyesId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(x => x.Mouth)
-            .WithMany(x => x.Mouths)
-            .HasForeignKey(x => x.MouthId);
+        builder.HasMany(x => x.Parts)
+            .WithOne(x => x.Innogotchi)
+            .HasForeignKey(x => x.InnogotchiId);
     }
 }

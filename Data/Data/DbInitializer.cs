@@ -27,13 +27,13 @@ public class DbInitializer : IDbInitializer
         _context.UserRoles?.AddRange(FakeData.UserRoles);
         _context.SaveChanges();
 
-        _context.InnogotchiParts?.AddRange(FakeData.InnogotchiParts);
-        _context.SaveChanges();
+        //_context.Pets?.AddRange(FakeData.Pets);
+        //_context.SaveChanges();
 
-        _context.Pets?.AddRange(FakeData.Pets);
-        _context.SaveChanges();
+        //_context.InnogotchiParts?.AddRange(FakeData.InnogotchiParts);
+        //_context.SaveChanges();
 
-        _context.InnogotchiStates?.AddRange(FakeData.InnogotchiStates);
-        _context.SaveChanges();
+        //_context.InnogotchiStates?.AddRange(FakeData.InnogotchiStates);
+        //_context.SaveChanges();
     }
 }

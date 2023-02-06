@@ -1,15 +1,10 @@
-﻿using static Contracts.Enum.Enums;
-
-namespace Models.Core;
+﻿namespace Models.Core;
 
 
 public class InnogotchiStateDto
 {
-    public Guid Id { get; set; }
-    public Guid InnogotchiId { get; set; }
     public int Age { get; set; }
-    public HungerLevel Hunger { get; set; }
-    public ThirstyLevel Thirsty { get; set; }
-    public DateTimeOffset Created { get; set; }
-    public int HappyDays { get; set; }
+    public string? Hunger { get; set; }
+    public string? Thirsty { get; set; }
+    public int HappinessDays { get; set; }
 }
