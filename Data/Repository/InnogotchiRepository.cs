@@ -25,11 +25,11 @@ public class InnogotchiRepository : IInnogotchiRepository
         _dbSetPets = context.Set<Innogotchi>();
         _dbSetParts = context.Set<InnogotchiPart>();
     }
-    public async Task CreateAsync(Farm farm, InnogotchiDto innogotchiDto)
+    public async Task CreateAsync(Guid farmId, InnogotchiDto innogotchiDto)
     {
         var innogotchi = _mapper.Map<Innogotchi>(innogotchiDto);
 
-        innogotchi.FarmId = farm.Id;
+        innogotchi.FarmId = farmId;
 
         await _dbSetPets.AddAsync(innogotchi);
 
