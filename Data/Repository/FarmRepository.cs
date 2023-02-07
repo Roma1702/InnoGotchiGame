@@ -2,7 +2,6 @@
 using DataAccessLayer.Abstraction.Interfaces;
 using DataAccessLayer.Data;
 using Entities.Entity;
-using Entities.Identity;
 using Microsoft.EntityFrameworkCore;
 using Models.Core;
 using static Contracts.Enum.Enums;
@@ -21,20 +20,20 @@ public class FarmRepository : IFarmRepository
         _context = context;
         _dbSetFarms = context.Set<Farm>();
     }
-    public async Task CreateAsync(User user, FarmDto farmDto)
+    public async Task CreateAsync(Guid userId, FarmDto farmDto)
     {
         var farm = _mapper.Map<Farm>(farmDto);
 
-        farm.UserId = user.Id;
+        farm.UserId = userId;
 
         await _dbSetFarms.AddAsync(farm);
 
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(User user)
+    public async Task DeleteAsync(Guid userId)
     {
-        var farm = await _dbSetFarms.FirstOrDefaultAsync(x => x.UserId == user.Id);
+        var farm = await _dbSetFarms.FirstOrDefaultAsync(x => x.UserId == userId);
 
         if (farm is not null)
         {
@@ -57,11 +56,11 @@ public class FarmRepository : IFarmRepository
         return farmDto;
     }
 
-    public async Task<FarmDto?> GetByIdAsync(Guid id)
+    public async Task<FarmDto?> GetByIdAsync(Guid userId)
     {
         var farm = await _dbSetFarms.AsNoTracking()
             .Include(x => x.Pets)
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.UserId == userId);
 
         if (farm is null) return null;
 
@@ -84,9 +83,9 @@ public class FarmRepository : IFarmRepository
         return await Task.FromResult(farmsDto);
     }
 
-    public async Task UpdateAsync(User user, FarmDto farmDto)
+    public async Task UpdateAsync(Guid userId, FarmDto farmDto)
     {
-        var farm = await _dbSetFarms.FirstOrDefaultAsync(x => x.UserId == user.Id);
+        var farm = await _dbSetFarms.FirstOrDefaultAsync(x => x.UserId == userId);
 
         if (farm is not null)
         {
@@ -98,9 +97,9 @@ public class FarmRepository : IFarmRepository
         }
     }
 
-    public async Task<int> GetCountOfAliveAsync(Guid id)
+    public async Task<int> GetCountOfAliveAsync(Guid userId)
     {
-        var ownFarm = await GetFarmAsync(id);
+        var ownFarm = await GetFarmAsync(userId);
 
         var count = ownFarm!.Pets!.Count(x => x.InnogotchiState!.Hunger != HungerLevel.Dead
             && x.InnogotchiState.Thirsty != ThirstyLevel.Dead);
@@ -108,9 +107,9 @@ public class FarmRepository : IFarmRepository
         return count;
     }
 
-    public async Task<int> GetCountOfDeadAsync(Guid id)
+    public async Task<int> GetCountOfDeadAsync(Guid userId)
     {
-        var ownFarm = await GetFarmAsync(id);
+        var ownFarm = await GetFarmAsync(userId);
 
         var count = ownFarm!.Pets!.Count(x => x.InnogotchiState!.Hunger == HungerLevel.Dead
             && x.InnogotchiState.Thirsty == ThirstyLevel.Dead);
@@ -118,10 +117,10 @@ public class FarmRepository : IFarmRepository
         return count;
     }
 
-    public async Task<double> GetAverageFeedPeriodAsync(Guid id)
+    public async Task<double> GetAverageFeedPeriodAsync(Guid userId)
     {
         List<double> feedingDates = new();
-        var ownFarm = await GetFarmAsync(id);
+        var ownFarm = await GetFarmAsync(userId);
         var pets = ownFarm!.Pets!;
 
         foreach (var item in pets)
@@ -143,16 +142,16 @@ public class FarmRepository : IFarmRepository
             feedingDates.Add(avgPeriod);
         }
 
-        var allAvgPeriod = feedingDates.Average();
+        var allAvgPeriod = feedingDates.Count > 0 ? feedingDates.Average() : 0;
 
         return allAvgPeriod;
     }
 
-    public async Task<double> GetAverageDrinkPeriodAsync(Guid id)
+    public async Task<double> GetAverageDrinkPeriodAsync(Guid userId)
     {
         List<double> feedingDates = new();
 
-        var ownFarm = await GetFarmAsync(id);
+        var ownFarm = await GetFarmAsync(userId);
 
         var pets = ownFarm!.Pets!;
 
@@ -175,36 +174,36 @@ public class FarmRepository : IFarmRepository
             feedingDates.Add(avgPeriod);
         }
 
-        var allAvgPeriod = feedingDates.Average();
+        var allAvgPeriod = feedingDates.Count > 0 ? feedingDates.Average() : 0;
 
         return allAvgPeriod;
     }
 
-    public async Task<double> GetAverageHappinessDaysCount(Guid id)
+    public async Task<double> GetAverageHappinessDaysCount(Guid userId)
     {
-        var ownFarm = await GetFarmAsync(id);
+        var ownFarm = await GetFarmAsync(userId);
 
         var avgHappyDays = ownFarm!.Pets!.Average(x => x.InnogotchiState!.HappinessDays);
 
         return Math.Round(avgHappyDays, 1);
     }
 
-    public async Task<double> GetAverageAgeAsync(Guid id)
+    public async Task<double> GetAverageAgeAsync(Guid userId)
     {
-        var ownFarm = await GetFarmAsync(id);
+        var ownFarm = await GetFarmAsync(userId);
 
         var avgHappyDays = ownFarm!.Pets!.Average(x => x.InnogotchiState!.Age);
 
         return Math.Round(avgHappyDays, 1);
     }
 
-    private async Task<Farm?> GetFarmAsync(Guid id)
+    private async Task<Farm?> GetFarmAsync(Guid userId)
     {
         var ownFarm = await _dbSetFarms.AsNoTracking()
             .Include(x => x.Pets!)
             .ThenInclude(x => x.InnogotchiState!)
             .ThenInclude(x => x.MealTimes)
-            .FirstOrDefaultAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.UserId == userId);
 
         return ownFarm;
     }
