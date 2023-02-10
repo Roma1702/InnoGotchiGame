@@ -1,7 +1,6 @@
 ﻿using Contracts.DTO;
 using Core.Abstraction.Interfaces;
 using DataAccessLayer.Abstraction.Interfaces;
-using Entities.Identity;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Models.Core;
@@ -12,17 +11,14 @@ public class FarmService : IFarmService
 {
     private readonly IFarmRepository _farmRepository;
     private readonly IUserFriendRepository _userFriendRepository;
-    private readonly IUserRepository _userRepository;
     private readonly IValidator<FarmDto> _validator;
 
     public FarmService(IFarmRepository farmRepository,
-        IUserRepository userRepository,
         IUserFriendRepository userFriendRepository,
         IValidator<FarmDto> validator)
     {
         _farmRepository = farmRepository;
         _userFriendRepository = userFriendRepository;
-        _userRepository = userRepository;
         _validator = validator;
     }
     public async Task<IActionResult> CreateAsync(Guid userId, FarmDto farmDto)
@@ -71,7 +67,7 @@ public class FarmService : IFarmService
 
     public async Task<IActionResult> UpdateAsync(Guid userId, FarmDto farmDto)
     {
-        var farm = await _validator.ValidateAsync(farmDto);
+        var farm = _validator.Validate(farmDto);
 
         if (farm.IsValid)
         {

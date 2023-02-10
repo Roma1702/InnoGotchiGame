@@ -61,8 +61,8 @@ builder.Services.RepositoriesProvide();
 builder.Services.ServicesProvide();
 builder.Services.MappersProvide();
 builder.Services.ValidatorsProvide();
-//builder.Services.AddHostedService(
-//    provider => provider.GetRequiredService<PeriodicHostedService>());
+builder.Services.AddHostedService(
+    provider => provider.GetRequiredService<PeriodicHostedService>());
 
 var app = builder.Build();
 

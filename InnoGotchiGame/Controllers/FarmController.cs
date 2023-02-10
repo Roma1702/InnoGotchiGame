@@ -1,5 +1,6 @@
 ﻿using Contracts.DTO;
 using Core.Abstraction.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Core;
 
@@ -19,6 +20,7 @@ public class FarmController : ControllerBase
         _identityService = identityService;
     }
 
+    [Authorize]
     [HttpGet("friendsFarms")]
     public async Task<List<FarmDto>?> GetChunkAsync(int number, int size)
     {
@@ -27,6 +29,7 @@ public class FarmController : ControllerBase
         return await _farmService.GetChunkAsync(Guid.Parse(userId), number, size);
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<FarmDto?> GetByIdAsync()
     {
@@ -35,6 +38,7 @@ public class FarmController : ControllerBase
         return await _farmService.GetByIdAsync(Guid.Parse(userId));
     }
 
+    [Authorize]
     [HttpGet("statistic")]
     public async Task<FarmStatisticDto?> GetFarmStatistic()
     {
@@ -43,12 +47,14 @@ public class FarmController : ControllerBase
         return await _farmService.GetFarmStatistic(Guid.Parse(userId));
     }
 
+    [Authorize]
     [HttpGet("name")]
     public async Task<FarmDto?> GetByNameAsync(string name)
     {
         return await _farmService.GetByNameAsync(name);
     }
 
+    [Authorize]
     [HttpPost("create")]
     public async Task CreateAsync(FarmDto farmDto)
     {
@@ -60,6 +66,7 @@ public class FarmController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPut("edit")]
     public async Task UpdateAsync(FarmDto farmDto)
     {
@@ -71,6 +78,7 @@ public class FarmController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpDelete("delete")]
     public async Task DeleteAsync()
     {

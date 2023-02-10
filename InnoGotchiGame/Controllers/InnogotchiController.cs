@@ -1,5 +1,6 @@
 ﻿using Contracts.DTO;
 using Core.Abstraction.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Core;
 
@@ -22,6 +23,7 @@ public class InnogotchiController : ControllerBase
         _innogotchiStateService = innogotchiStateService;
     }
 
+    [Authorize]
     [HttpGet("chunk")]
     public async Task<List<PetInfoDto>?> GetChunkAsync(int number = 0, int size = 15)
     {
@@ -30,6 +32,7 @@ public class InnogotchiController : ControllerBase
         return await _innogotchiService.GetChunkAsync(Guid.Parse(userId), number, size);
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<InnogotchiDto?> GetByNameAsync(string name)
     {
@@ -38,6 +41,7 @@ public class InnogotchiController : ControllerBase
         return await _innogotchiService.GetByNameAsync(Guid.Parse(userId), name);
     }
 
+    [Authorize]
     [HttpPost("create")]
     public async Task CreateAsync([FromForm]InnogotchiDto innogotchiDto)
     {
@@ -46,24 +50,28 @@ public class InnogotchiController : ControllerBase
         await _innogotchiService.CreateAsync(Guid.Parse(userId), innogotchiDto);
     }
 
+    [Authorize]
     [HttpPut("update")]
     public async Task UpdateAsync(InnogotchiDto innogotchiDto)
     {
         await _innogotchiService.UpdateAsync(innogotchiDto);
     }
 
+    [Authorize]
     [HttpPut("feed")]
     public async Task FeedAsync(string name)
     {
         await _innogotchiStateService.FeedAsync(name);
     }
 
+    [Authorize]
     [HttpPut("drink")]
     public async Task DrinkAsync(string name)
     {
         await _innogotchiStateService.DrinkAsync(name);
     }
 
+    [Authorize]
     [HttpDelete("delete")]
     public async Task DeleteAsync(string name)
     {
