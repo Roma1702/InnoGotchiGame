@@ -51,7 +51,7 @@ public class FarmRepository : IFarmRepository
 
         if (farm is null) return null;
 
-        var farmDto = _mapper .Map<FarmDto>(farm);
+        var farmDto = _mapper.Map<FarmDto>(farm);
 
         return farmDto;
     }
