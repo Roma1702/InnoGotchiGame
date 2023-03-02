@@ -1,6 +1,5 @@
 ﻿namespace Models.Core;
 
-
 public class InnogotchiStateDto
 {
     public int Age { get; set; }

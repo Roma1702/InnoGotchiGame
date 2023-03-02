@@ -20,8 +20,8 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("id")]
-    public async Task<ShortUserDto?> GetByNameAsync(Guid id)
+    [HttpGet("{id}")]
+    public async Task<ShortUserDto?> GetByIdAsync(Guid id)
     {
         return await _userService.GetByIdAsync(id);
     }
@@ -44,7 +44,7 @@ public class UserController : ControllerBase
 
     [Authorize]
     [HttpGet("requests")]
-    public async Task<List<ShortUserDto>?> GetChunkAsync(int number, int size)
+    public async Task<IEnumerable<ShortUserDto>?> GetChunkAsync(int number, int size)
     {
         var userId = _identityService.GetUserIdentity();
 
@@ -82,15 +82,19 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut("edit")]
-    public async Task UpdateAsync([FromForm] ShortUserDto userDto)
+    [HttpPut]
+    public async Task<IActionResult> UpdateAsync([FromForm] ShortUserDto userDto)
     {
         var userId = _identityService.GetUserIdentity();
 
         if (userId != string.Empty)
         {
             await _userService.UpdateAsync(Guid.Parse(userId), userDto);
+
+            return Ok(userDto);
         }
+
+        return BadRequest();
     }
 
     [Authorize]
@@ -106,7 +110,19 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpDelete("delete")]
+    [HttpDelete("reject")]
+    public async Task RejectAsync(string friendName)
+    {
+        var userId = _identityService.GetUserIdentity();
+
+        if (userId != string.Empty)
+        {
+            await _userService.RejectAsync(Guid.Parse(userId), friendName);
+        }
+    }
+
+    [Authorize]
+    [HttpDelete]
     public async Task DeleteAsync()
     {
         var userId = _identityService.GetUserIdentity();

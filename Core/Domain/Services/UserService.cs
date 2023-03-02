@@ -1,7 +1,6 @@
 ﻿using Core.Abstraction.Interfaces;
 using DataAccessLayer.Abstraction.Interfaces;
 using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
 using Models.Core;
 
 namespace Core.Domain.Services;
@@ -27,25 +26,19 @@ public class UserService : IUserService
         _shortUserValidator = shortUserValidator;
     }
 
-    public async Task<IActionResult> UpdatePasswordAsync(Guid id, ChangePasswordDto changePasswordDto)
+    public async Task UpdatePasswordAsync(Guid id, ChangePasswordDto changePasswordDto)
     {
         var passwordModel = await _passwordValidator.ValidateAsync(changePasswordDto);
 
         if (passwordModel.IsValid)
         {
             await _userRepository.UpdatePasswordAsync(id, changePasswordDto);
-
-            return new OkResult();
         }
-
-        return new BadRequestResult();
     }
 
-    public async Task<IActionResult> DeleteAsync(Guid id)
+    public async Task DeleteAsync(Guid id)
     {
         await _userRepository.DeleteAsync(id);
-
-        return new OkResult();
     }
 
     public async Task<ShortUserDto?> GetByIdAsync(Guid id)
@@ -62,7 +55,7 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task<List<ShortUserDto>?> GetChunkAsync(Guid userId, int number, int size)
+    public async Task<IEnumerable<ShortUserDto>?> GetChunkAsync(Guid userId, int number, int size)
     {
         var requests = await _userFriendRepository.GetRequestsId(userId);
 
@@ -71,21 +64,17 @@ public class UserService : IUserService
         return users;
     }
 
-    public async Task<IActionResult> SignUpAsync(UserDto userDto)
+    public async Task SignUpAsync(UserDto userDto)
     {
         var user = await _userValidator.ValidateAsync(userDto);
 
         if (user.IsValid)
         {
             await _userRepository.CreateAsync(userDto);
-
-            return new OkResult();
         }
-
-        return new BadRequestResult();
     }
 
-    public async Task<IActionResult> UpdateAsync(Guid id, ShortUserDto userDto)
+    public async Task UpdateAsync(Guid id, ShortUserDto userDto)
     {
         var result = await _userRepository.GetByIdAsync(id);
 
@@ -96,14 +85,10 @@ public class UserService : IUserService
             if (user.IsValid)
             {
                 await _userRepository.UpdateAsync(id ,userDto);
-
-                return new OkResult();
             }
         }
-
-        return new BadRequestResult();
     }
-    public async Task<IActionResult> InviteAsync(Guid userId, string friendName)
+    public async Task InviteAsync(Guid userId, string friendName)
     {
         var friendDto = await _userRepository.GetByNameAsync(friendName);
 
@@ -112,13 +97,9 @@ public class UserService : IUserService
             var friend = await _userRepository.GetUserAsync(friendDto!);
 
             await _userFriendRepository.InviteAsync(userId, friend!.Id);
-
-            return new OkResult();
         }
-
-        return new BadRequestResult();
     }
-    public async Task<IActionResult> ConfirmAsync(Guid userId, string friendName)
+    public async Task ConfirmAsync(Guid userId, string friendName)
     {
         var friendDto = await _userRepository.GetByNameAsync(friendName);
 
@@ -127,10 +108,18 @@ public class UserService : IUserService
             var friend = await _userRepository.GetUserAsync(friendDto!);
 
             await _userFriendRepository.ConfirmAsync(userId, friend!.Id);
-
-            return new OkResult();
         }
+    }
 
-        return new BadRequestResult();
+    public async Task RejectAsync(Guid userId, string friendName)
+    {
+        var friendDto = await _userRepository.GetByNameAsync(friendName);
+
+        if (friendDto is not null)
+        {
+            var friend = await _userRepository.GetUserAsync(friendDto!);
+
+            await _userFriendRepository.RejectAsync(userId, friend!.Id);
+        }
     }
 }

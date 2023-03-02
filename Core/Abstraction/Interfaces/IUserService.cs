@@ -1,17 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Models.Core;
+﻿using Models.Core;
 
 namespace Core.Abstraction.Interfaces;
 
 public interface IUserService
 {
-    public Task<List<ShortUserDto>?> GetChunkAsync(Guid userId, int number, int size);
+    public Task<IEnumerable<ShortUserDto>?> GetChunkAsync(Guid userId, int number, int size);
     public Task<ShortUserDto?> GetByIdAsync(Guid id);
     public Task<ShortUserDto?> GetByNameAsync(string name);
-    public Task<IActionResult> SignUpAsync(UserDto userDto);
-    public Task<IActionResult> UpdateAsync(Guid id, ShortUserDto userDto);
-    public Task<IActionResult> UpdatePasswordAsync(Guid id, ChangePasswordDto changePasswordDto);
-    public Task<IActionResult> DeleteAsync(Guid id);
-    public Task<IActionResult> InviteAsync(Guid userId, string friendName);
-    public Task<IActionResult> ConfirmAsync(Guid userId, string friendName);
+    public Task SignUpAsync(UserDto userDto);
+    public Task UpdateAsync(Guid id, ShortUserDto userDto);
+    public Task UpdatePasswordAsync(Guid id, ChangePasswordDto changePasswordDto);
+    public Task DeleteAsync(Guid id);
+    public Task InviteAsync(Guid userId, string friendName);
+    public Task ConfirmAsync(Guid userId, string friendName);
+    public Task RejectAsync(Guid userId, string friendName);
 }

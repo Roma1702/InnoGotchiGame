@@ -17,6 +17,7 @@ public class InnogotchiRepository : IInnogotchiRepository
     private readonly ApplicationContext _context;
     private readonly DbSet<Innogotchi> _dbSetPets;
     private readonly DbSet<InnogotchiPart> _dbSetParts;
+    private readonly DbSet<InnogotchiState> _dbSetState;
     public InnogotchiRepository(IMapper mapper,
         ApplicationContext context)
     {
@@ -24,6 +25,7 @@ public class InnogotchiRepository : IInnogotchiRepository
         _context = context;
         _dbSetPets = context.Set<Innogotchi>();
         _dbSetParts = context.Set<InnogotchiPart>();
+        _dbSetState = context.Set<InnogotchiState>();
     }
     public async Task CreateAsync(Guid farmId, InnogotchiDto innogotchiDto)
     {
@@ -31,11 +33,24 @@ public class InnogotchiRepository : IInnogotchiRepository
 
         innogotchi.FarmId = farmId;
 
-        await _dbSetPets.AddAsync(innogotchi);
+        using var transaction = _context.Database.BeginTransaction();
 
-        await AddPartsAsync(innogotchiDto, innogotchi);
+        try
+        {
+            await _dbSetPets.AddAsync(innogotchi);
 
-        await _context.SaveChangesAsync();
+            await AddPartsAsync(innogotchiDto, innogotchi);
+
+            await AddStateAsync(innogotchi);
+
+            await _context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+        }
     }
 
     public async Task DeleteAsync(string name)
@@ -66,7 +81,7 @@ public class InnogotchiRepository : IInnogotchiRepository
         return innogotchiDto;
     }
 
-    public async Task<List<PetInfoDto>?> GetChunkAsync(Guid farmId, int number, int size)
+    public async Task<IEnumerable<PetInfoDto>?> GetChunkAsync(Guid farmId, int number, int size)
     {
         var pets = await _dbSetPets.AsNoTracking()
             .Include(x => x.InnogotchiState)
@@ -83,7 +98,7 @@ public class InnogotchiRepository : IInnogotchiRepository
 
         return petsDto;
     }
-    public async Task<List<PetInfoDto>?> SortByAgeAsync(Guid farmId, int number, int size)
+    public async Task<IEnumerable<PetInfoDto>?> SortByAgeAsync(Guid farmId, int number, int size)
     {
         var pets = await _dbSetPets.AsNoTracking()
             .Include(x => x.InnogotchiState)
@@ -100,7 +115,7 @@ public class InnogotchiRepository : IInnogotchiRepository
 
         return petsDto;
     }
-    public async Task<List<PetInfoDto>?> SortByHungerLevelAsync(Guid farmId, int number, int size)
+    public async Task<IEnumerable<PetInfoDto>?> SortByHungerLevelAsync(Guid farmId, int number, int size)
     {
         var pets = await _dbSetPets.AsNoTracking()
             .Include(x => x.InnogotchiState)
@@ -117,7 +132,7 @@ public class InnogotchiRepository : IInnogotchiRepository
 
         return petsDto;
     }
-    public async Task<List<PetInfoDto>?> SortByWaterLevelAsync(Guid farmId, int number, int size)
+    public async Task<IEnumerable<PetInfoDto>?> SortByWaterLevelAsync(Guid farmId, int number, int size)
     {
         var pets = await _dbSetPets.AsNoTracking()
             .Include(x => x.InnogotchiState)
@@ -151,6 +166,22 @@ public class InnogotchiRepository : IInnogotchiRepository
         byte[]? imageData = binaryReader.ReadBytes((int)image.Length);
 
         return imageData;
+    }
+
+    private async Task AddStateAsync(Innogotchi innogotchi)
+    {
+        InnogotchiState state = new()
+        {
+            Age = 0,
+            Hunger = HungerLevel.Normal,
+            Thirsty = ThirstyLevel.Normal,
+            StartOfHappinessDays = DateTimeOffset.Now,
+            HappinessDays = 0,
+            Created = DateTimeOffset.Now,
+            Innogotchi = innogotchi
+        };
+
+        await _dbSetState.AddAsync(state);
     }
 
     private async Task AddPartsAsync(InnogotchiDto innogotchiDto, Innogotchi innogotchi)

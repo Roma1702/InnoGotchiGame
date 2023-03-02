@@ -30,10 +30,7 @@ public class PeriodicHostedService : BackgroundService
 
                 var stateService = asyncScope.ServiceProvider.GetRequiredService<InnogotchiStateService>();
 
-                await stateService.IncreaseAgeAsync();
-                await stateService.IncreaseHungerLevelAsync();
-                await stateService.IncreaseWaterLevelAsync();
-                await stateService.IncreaseHappinessDaysAsync();
+                await IncreaseInnogotchiState(stateService);
 
                 _executionCount++;
 
@@ -44,5 +41,13 @@ public class PeriodicHostedService : BackgroundService
                 _logger.LogInformation($"Failed to execute PeriodicHostedService with message: {ex.Message}");
             }
         }
+    }
+
+    private async Task IncreaseInnogotchiState(InnogotchiStateService stateService)
+    {
+        await stateService.IncreaseAgeAsync();
+        await stateService.IncreaseHungerLevelAsync();
+        await stateService.IncreaseWaterLevelAsync();
+        await stateService.IncreaseHappinessDaysAsync();
     }
 }

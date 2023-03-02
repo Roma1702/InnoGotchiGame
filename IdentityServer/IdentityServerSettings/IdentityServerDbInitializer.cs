@@ -38,6 +38,7 @@ public static class IdentityServerDbInitializer
             }
             context.SaveChanges();
         }
+
         if (!context.ApiResources.Any())
         {
             foreach (var resource in IdentityServerConfiguration.GetApiResources())

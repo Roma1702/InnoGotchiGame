@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Contracts.Enum;
+﻿namespace Contracts.Enum;
 
 public class Enums
 {

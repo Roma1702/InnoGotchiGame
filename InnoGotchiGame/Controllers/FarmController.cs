@@ -15,14 +15,14 @@ public class FarmController : ControllerBase
 
     public FarmController(IFarmService farmService,
         IIdentityService identityService)
-	{
+    {
         _farmService = farmService;
         _identityService = identityService;
     }
 
     [Authorize]
     [HttpGet("friendsFarms")]
-    public async Task<List<FarmDto>?> GetChunkAsync(int number, int size)
+    public async Task<IEnumerable<FarmDto>?> GetChunkAsync(int number, int size)
     {
         var userId = _identityService.GetUserIdentity();
 
@@ -30,7 +30,7 @@ public class FarmController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet]
+    [HttpGet("{id}")]
     public async Task<FarmDto?> GetByIdAsync()
     {
         var userId = _identityService.GetUserIdentity();
@@ -55,38 +55,50 @@ public class FarmController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("create")]
-    public async Task CreateAsync(FarmDto farmDto)
+    [HttpPost]
+    public async Task<IActionResult> CreateAsync(FarmDto farmDto)
     {
         var userId = _identityService.GetUserIdentity();
 
         if (userId != string.Empty)
         {
             await _farmService.CreateAsync(Guid.Parse(userId), farmDto);
+
+            return Ok(farmDto);
         }
+
+        return BadRequest();
     }
 
     [Authorize]
-    [HttpPut("edit")]
-    public async Task UpdateAsync(FarmDto farmDto)
+    [HttpPut]
+    public async Task<IActionResult> UpdateAsync(FarmDto farmDto)
     {
         var userId = _identityService.GetUserIdentity();
 
         if (userId != string.Empty)
         {
             await _farmService.UpdateAsync(Guid.Parse(userId), farmDto);
+
+            return Ok(farmDto);
         }
+
+        return BadRequest();
     }
 
     [Authorize]
-    [HttpDelete("delete")]
-    public async Task DeleteAsync()
+    [HttpDelete]
+    public async Task<IActionResult> DeleteAsync()
     {
         var userId = _identityService.GetUserIdentity();
 
         if (userId != string.Empty)
         {
             await _farmService.DeleteAsync(Guid.Parse(userId));
+
+            return Ok(userId);
         }
+
+        return NotFound();
     }
 }
