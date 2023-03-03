@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Mapping.Mappers;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace Mapping.DependencyInject;
 
@@ -10,11 +10,7 @@ public static class MapperProvider
     {
         var configuration = new MapperConfiguration(options =>
         {
-            options.AddProfile(new FarmMapper());
-            options.AddProfile(new InnogotchiMapper());
-            options.AddProfile(new InnogotchiStateMapper());
-            options.AddProfile(new UserMapper());
-            options.AddProfile(new MediaMapper());
+            options.AddMaps(Assembly.GetExecutingAssembly());
         });
 
         var mapper = configuration.CreateMapper();

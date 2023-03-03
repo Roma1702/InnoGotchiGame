@@ -1,6 +1,4 @@
-﻿using Entities.Identity;
-
-namespace Entities.Entity;
+﻿namespace Entities.Entity;
 
 public class UserFriend
 {

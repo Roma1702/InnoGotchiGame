@@ -3,7 +3,6 @@ using DataAccessLayer.Abstraction.Interfaces;
 using DataAccessLayer.Data;
 using Entities.Entity;
 using Microsoft.EntityFrameworkCore;
-using Models.Core;
 using static Contracts.Enum.Enums;
 
 namespace DataAccessLayer.Repository;
@@ -22,26 +21,6 @@ public class InnogotchiStateRepository : IInnogotchiStateRepository
         _dbSetMeals = context.Set<MealTime>();
     }
 
-    public async Task CreateAsync(InnogotchiDto innogotchiDto)
-    {
-        var innogotchi = await _dbSetPets.FirstOrDefaultAsync(x => x.Name == innogotchiDto.Name);
-
-        InnogotchiState state = new()
-        {
-            Age = 0,
-            Hunger = HungerLevel.Normal,
-            Thirsty = ThirstyLevel.Normal,
-            StartOfHappinessDays = DateTimeOffset.Now,
-            HappinessDays = 0,
-            Created = DateTimeOffset.Now,
-            Innogotchi = innogotchi
-        };
-
-        await _dbSetState.AddAsync(state);
-
-        await _context.SaveChangesAsync();
-    }
-
     public async Task DrinkAsync(string name)
     {
         var innogotchi = await _dbSetPets.FirstOrDefaultAsync(x => x.Name == name);
@@ -57,7 +36,7 @@ public class InnogotchiStateRepository : IInnogotchiStateRepository
             MealTime drinking = new()
             {
                 InnogotchiStateId = innogotchi.InnogotchiState.Id,
-                Time= DateTimeOffset.Now,
+                Time = DateTimeOffset.Now,
                 MealType = MealType.Drinking,
             };
 
@@ -102,7 +81,7 @@ public class InnogotchiStateRepository : IInnogotchiStateRepository
         {
             if (state.Thirsty != ThirstyLevel.Dead && state.Hunger != HungerLevel.Dead)
             {
-                state.Age = (DateTimeOffset.Now - state.Created).TotalDays / ageEquivalent > state.Age
+                state.Age = (DateTimeOffset.Now - state.Created).Days / ageEquivalent > state.Age
                     ? state.Age + 1 : state.Age;
             }
         }
@@ -120,7 +99,7 @@ public class InnogotchiStateRepository : IInnogotchiStateRepository
         {
             if (state.Thirsty != ThirstyLevel.Dead && state.Hunger != HungerLevel.Dead)
             {
-                state.Thirsty = (DateTimeOffset.Now - state.Created).TotalDays / thirstyPeriod > (int)state.Thirsty
+                state.Thirsty = (DateTimeOffset.Now - state.Created).Days / thirstyPeriod > (int)state.Thirsty
                     ? state.Thirsty + 1 : state.Thirsty;
 
                 state.StartOfHappinessDays = state.Thirsty < ThirstyLevel.Normal
@@ -141,7 +120,7 @@ public class InnogotchiStateRepository : IInnogotchiStateRepository
         {
             if (state.Thirsty != ThirstyLevel.Dead && state.Hunger != HungerLevel.Dead)
             {
-                state.Hunger = (DateTimeOffset.Now - state.Created).TotalDays / hungerPeriod > (int)state.Hunger
+                state.Hunger = (DateTimeOffset.Now - state.Created).Days / hungerPeriod > (int)state.Hunger
                     ? state.Hunger + 1 : state.Hunger;
 
                 state.StartOfHappinessDays = state.Hunger < HungerLevel.Normal
@@ -158,8 +137,8 @@ public class InnogotchiStateRepository : IInnogotchiStateRepository
 
         foreach (var state in states)
         {
-            state.HappinessDays = (state.Hunger <= HungerLevel.Normal && state.Thirsty <= ThirstyLevel.Normal)
-                ? (DateTimeOffset.Now - state.StartOfHappinessDays).Days + 1 : 0;
+            state.HappinessDays = (state.Hunger >= HungerLevel.Normal && state.Thirsty >= ThirstyLevel.Normal)
+                ? (DateTimeOffset.Now - state.StartOfHappinessDays).Days : 0;
         }
 
         await _context.SaveChangesAsync();

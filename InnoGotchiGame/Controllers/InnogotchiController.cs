@@ -25,11 +25,38 @@ public class InnogotchiController : ControllerBase
 
     [Authorize]
     [HttpGet("chunk")]
-    public async Task<List<PetInfoDto>?> GetChunkAsync(int number = 0, int size = 15)
+    public async Task<IEnumerable<PetInfoDto>?> GetChunkAsync(int number = 0, int size = 15)
     {
         var userId = _identityService.GetUserIdentity();
 
         return await _innogotchiService.GetChunkAsync(Guid.Parse(userId), number, size);
+    }
+
+    [Authorize]
+    [HttpGet("sortByAge")]
+    public async Task<IEnumerable<PetInfoDto>?> SortByAgeAsync(int number = 0, int size = 15)
+    {
+        var userId = _identityService.GetUserIdentity();
+
+        return await _innogotchiService.SortByAgeAsync(Guid.Parse(userId), number, size);
+    }
+
+    [Authorize]
+    [HttpGet("sortByHunger")]
+    public async Task<IEnumerable<PetInfoDto>?> SortByHungerLevelAsync(int number = 0, int size = 15)
+    {
+        var userId = _identityService.GetUserIdentity();
+
+        return await _innogotchiService.SortByHungerLevelAsync(Guid.Parse(userId), number, size);
+    }
+
+    [Authorize]
+    [HttpGet("sortByThirsty")]
+    public async Task<IEnumerable<PetInfoDto>?> SortByWaterLevelAsync(int number = 0, int size = 15)
+    {
+        var userId = _identityService.GetUserIdentity();
+
+        return await _innogotchiService.SortByWaterLevelAsync(Guid.Parse(userId), number, size);
     }
 
     [Authorize]
@@ -42,19 +69,23 @@ public class InnogotchiController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("create")]
-    public async Task CreateAsync([FromForm]InnogotchiDto innogotchiDto)
+    [HttpPost]
+    public async Task<IActionResult> CreateAsync([FromForm]InnogotchiDto innogotchiDto)
     {
         var userId = _identityService.GetUserIdentity();
 
         await _innogotchiService.CreateAsync(Guid.Parse(userId), innogotchiDto);
+
+        return Ok(innogotchiDto);
     }
 
     [Authorize]
-    [HttpPut("update")]
-    public async Task UpdateAsync(InnogotchiDto innogotchiDto)
+    [HttpPut]
+    public async Task<IActionResult> UpdateAsync(InnogotchiDto innogotchiDto)
     {
         await _innogotchiService.UpdateAsync(innogotchiDto);
+
+        return Ok(innogotchiDto);
     }
 
     [Authorize]
@@ -72,7 +103,7 @@ public class InnogotchiController : ControllerBase
     }
 
     [Authorize]
-    [HttpDelete("delete")]
+    [HttpDelete]
     public async Task DeleteAsync(string name)
     {
         await _innogotchiService.DeleteAsync(name);

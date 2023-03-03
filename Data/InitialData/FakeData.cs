@@ -118,9 +118,9 @@ public static class FakeData
             Age = 0,
             Hunger = HungerLevel.Normal,
             Thirsty = ThirstyLevel.Normal,
-            StartOfHappinessDays = DateTimeOffset.Now,
+            StartOfHappinessDays = DateTimeOffset.Now.AddDays(-2),
             HappinessDays = 0,
-            Created = DateTimeOffset.Now,
+            Created = DateTimeOffset.Now.AddDays(-2),
             Innogotchi = Pets!.First()
         }
     };

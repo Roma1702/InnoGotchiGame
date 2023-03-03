@@ -10,9 +10,6 @@ public class MediaMapper : Profile
     public MediaMapper()
     {
         CreateMap<InnogotchiPart, MediaDto>().ReverseMap();
-        //.ForMember(dest => dest.Image, opt => opt.Ignore())
-        //.ReverseMap()
-        //.ForMember(dest => dest.Image, opt => opt.Ignore());
 
         CreateMap<IFormFile, byte[]>()
             .ConvertUsing(new IFormFileToByteArray());

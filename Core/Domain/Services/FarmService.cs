@@ -2,7 +2,6 @@
 using Core.Abstraction.Interfaces;
 using DataAccessLayer.Abstraction.Interfaces;
 using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
 using Models.Core;
 
 namespace Core.Domain.Services;
@@ -21,25 +20,19 @@ public class FarmService : IFarmService
         _userFriendRepository = userFriendRepository;
         _validator = validator;
     }
-    public async Task<IActionResult> CreateAsync(Guid userId, FarmDto farmDto)
+    public async Task CreateAsync(Guid userId, FarmDto farmDto)
     {
         var farm = _validator.Validate(farmDto);
 
         if (farm.IsValid)
         {
             await _farmRepository.CreateAsync(userId, farmDto);
-
-            return new OkResult();
         }
-
-        return new BadRequestResult();
     }
 
-    public async Task<IActionResult> DeleteAsync(Guid userId)
+    public async Task DeleteAsync(Guid userId)
     {
         await _farmRepository.DeleteAsync(userId);
-
-        return new OkResult();
     }
 
     public async Task<FarmDto?> GetByNameAsync(string name)
@@ -56,7 +49,7 @@ public class FarmService : IFarmService
         return farm ?? null;
     }
 
-    public async Task<List<FarmDto>?> GetChunkAsync(Guid id, int number, int size)
+    public async Task<IEnumerable<FarmDto>?> GetChunkAsync(Guid id, int number, int size)
     {
         var userFriends = await _userFriendRepository.GetFriendsId(id);
 
@@ -65,21 +58,24 @@ public class FarmService : IFarmService
         return farms ?? null;
     }
 
-    public async Task<IActionResult> UpdateAsync(Guid userId, FarmDto farmDto)
+    public async Task UpdateAsync(Guid userId, FarmDto farmDto)
     {
         var farm = _validator.Validate(farmDto);
 
         if (farm.IsValid)
         {
             await _farmRepository.UpdateAsync(userId, farmDto);
-
-            return new OkResult();
         }
-
-        return new BadRequestResult();
     }
 
     public async Task<FarmStatisticDto?> GetFarmStatistic(Guid userId)
+    {
+        var farmStatistic = await HandleFarmStatistic(userId);
+
+        return farmStatistic;
+    }
+
+    private async Task<FarmStatisticDto> HandleFarmStatistic(Guid userId)
     {
         var countOfAlivePets = await _farmRepository.GetCountOfAliveAsync(userId);
         var countOfDeadPets = await _farmRepository.GetCountOfDeadAsync(userId);

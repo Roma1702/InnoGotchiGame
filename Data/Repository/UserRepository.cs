@@ -119,7 +119,7 @@ public class UserRepository : IUserRepository
         return userDto;
     }
 
-    public async Task<List<ShortUserDto>?> GetChunkAsync(List<Guid> requestsId, int number, int size)
+    public async Task<IEnumerable<ShortUserDto>?> GetChunkAsync(IEnumerable<Guid> requestsId, int number, int size)
     {
         var users = await _dbSet.AsNoTracking()
             .Include(x => x.Farm)

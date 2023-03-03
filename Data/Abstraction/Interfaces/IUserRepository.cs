@@ -5,7 +5,7 @@ namespace DataAccessLayer.Abstraction.Interfaces;
 
 public interface IUserRepository
 {
-    public Task<List<ShortUserDto>?> GetChunkAsync(List<Guid> requestsId, int number, int size);
+    public Task<IEnumerable<ShortUserDto>?> GetChunkAsync(IEnumerable<Guid> requestsId, int number, int size);
     public Task<ShortUserDto?> GetByIdAsync(Guid id);
     public Task<ShortUserDto?> GetByNameAsync(string name);
     public Task CreateAsync(UserDto userDto);
