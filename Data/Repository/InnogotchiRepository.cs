@@ -6,7 +6,6 @@ using Entities.Entity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Models.Core;
-using System.Net.Mime;
 using static Contracts.Enum.Enums;
 
 namespace DataAccessLayer.Repository;
@@ -39,7 +38,7 @@ public class InnogotchiRepository : IInnogotchiRepository
         {
             await _dbSetPets.AddAsync(innogotchi);
 
-            await AddPartsAsync(innogotchiDto, innogotchi);
+            //await AddPartsAsync(innogotchiDto, innogotchi);
 
             await AddStateAsync(innogotchi);
 
@@ -76,20 +75,61 @@ public class InnogotchiRepository : IInnogotchiRepository
 
         var innogotchiDto = _mapper.Map<InnogotchiDto>(innogotchi);
 
-        ConvertToFormFile(innogotchiDto, innogotchi!);
-
         return innogotchiDto;
     }
 
-    public async Task<IEnumerable<PetInfoDto>?> GetChunkAsync(Guid farmId, int number, int size)
+    public async Task<PetInfoDto?> GetStateByNameAsync(Guid farmId, string name)
     {
         var pets = await _dbSetPets.AsNoTracking()
             .Include(x => x.InnogotchiState)
             .Include(x => x.Parts)
             .Where(x => x.FarmId == farmId)
+            .FirstOrDefaultAsync(x => x.Name == name);
+
+        if (pets is null) return null;
+
+        var petDto = _mapper.Map<PetInfoDto>(pets);
+
+        return petDto;
+    }
+
+    public async Task<int> GetCountAsync(Guid farmId)
+    {
+        var count = _dbSetPets
+            .AsNoTracking()
+            .Include(x => x.Farm)
+            .Count(x => x.FarmId == farmId);
+
+        return await Task.FromResult(count);
+    }
+
+    public async Task<IEnumerable<InnogotchiDto>?> GetChunkAsync(Guid farmId, int number, int size)
+    {
+        var pets = await _dbSetPets.AsNoTracking()
+            .Include(x => x.InnogotchiState)
+            .Include(x => x.Parts)
+            .OrderBy(x => x.InnogotchiState!.HappinessDays)
+            .Where(x => x.FarmId == farmId)
             .Skip(number * size)
             .Take(size)
+            .ToListAsync();
+
+        if (pets is null) return null;
+
+        var petsDto = _mapper.Map<List<InnogotchiDto>>(pets);
+
+        return petsDto;
+    }
+
+    public async Task<IEnumerable<PetInfoDto>?> SortByHappinessDays(Guid farmId, int number, int size)
+    {
+        var pets = await _dbSetPets.AsNoTracking()
+            .Include(x => x.InnogotchiState)
+            .Include(x => x.Parts)
+            .Where(x => x.FarmId == farmId)
             .OrderBy(x => x.InnogotchiState!.HappinessDays)
+            .Skip(number * size)
+            .Take(size)
             .ToListAsync();
 
         if (pets is null) return null;
@@ -98,15 +138,16 @@ public class InnogotchiRepository : IInnogotchiRepository
 
         return petsDto;
     }
+
     public async Task<IEnumerable<PetInfoDto>?> SortByAgeAsync(Guid farmId, int number, int size)
     {
         var pets = await _dbSetPets.AsNoTracking()
             .Include(x => x.InnogotchiState)
             .Include(x => x.Parts)
             .Where(x => x.FarmId == farmId)
+            .OrderBy(x => x.InnogotchiState!.Age)
             .Skip(number * size)
             .Take(size)
-            .OrderBy(x => x.InnogotchiState!.Age)
             .ToListAsync();
 
         if (pets is null) return null;
@@ -121,9 +162,9 @@ public class InnogotchiRepository : IInnogotchiRepository
             .Include(x => x.InnogotchiState)
             .Include(x => x.Parts)
             .Where(x => x.FarmId == farmId)
+            .OrderByDescending(x => x.InnogotchiState!.Hunger)
             .Skip(number * size)
             .Take(size)
-            .OrderBy(x => x.InnogotchiState!.Hunger)
             .ToListAsync();
 
         if (pets is null) return null;
@@ -138,9 +179,9 @@ public class InnogotchiRepository : IInnogotchiRepository
             .Include(x => x.InnogotchiState)
             .Include(x => x.Parts)
             .Where(x => x.FarmId == farmId)
+            .OrderByDescending(x => x.InnogotchiState!.Thirsty)
             .Skip(number * size)
             .Take(size)
-            .OrderBy(x => x.InnogotchiState!.Thirsty)
             .ToListAsync();
 
         if (pets is null) return null;
@@ -182,79 +223,5 @@ public class InnogotchiRepository : IInnogotchiRepository
         };
 
         await _dbSetState.AddAsync(state);
-    }
-
-    private async Task AddPartsAsync(InnogotchiDto innogotchiDto, Innogotchi innogotchi)
-    {
-        InnogotchiPart body = new()
-        {
-            Image = ConvertToByteArray(innogotchiDto.Body!.Image!),
-            PartType = PartType.Body,
-            InnogotchiId = innogotchi.Id
-        };
-        InnogotchiPart nose = new()
-        {
-            Image = ConvertToByteArray(innogotchiDto.Body!.Image!),
-            PartType = PartType.Nose,
-            InnogotchiId = innogotchi.Id
-        };
-        InnogotchiPart eyes = new()
-        {
-            Image = ConvertToByteArray(innogotchiDto.Body!.Image!),
-            PartType = PartType.Eyes,
-            InnogotchiId = innogotchi.Id
-        };
-        InnogotchiPart mouth = new()
-        {
-            Image = ConvertToByteArray(innogotchiDto.Body!.Image!),
-            PartType = PartType.Mouth,
-            InnogotchiId = innogotchi.Id
-        };
-
-        await _dbSetParts.AddRangeAsync(body, mouth, nose, eyes);
-    }
-
-    private void ConvertToFormFile(InnogotchiDto innogotchiDto, Innogotchi innogotchi)
-    {
-        var partDto = new MediaDto();
-
-        foreach (var part in innogotchi!.Parts!)
-        {
-            using (var stream = new MemoryStream(part!.Image!))
-            {
-                var formFile = new FormFile(stream, 0, part!.Image!.Length, "photo", "fileName")
-                {
-                    Headers = new HeaderDictionary(),
-                    ContentType = "application/json"
-                };
-
-                ContentDisposition cd = new()
-                {
-                    FileName = formFile.FileName
-                };
-                formFile.ContentDisposition = cd.ToString();
-
-                if (part.PartType == PartType.Body)
-                {
-                    innogotchiDto.Body = partDto;
-                    innogotchiDto.Body!.Image = formFile;
-                }
-                else if (part.PartType == PartType.Nose)
-                {
-                    innogotchiDto.Nose = partDto;
-                    innogotchiDto.Nose!.Image = formFile;
-                }
-                else if (part.PartType == PartType.Mouth)
-                {
-                    innogotchiDto.Mouth = partDto;
-                    innogotchiDto.Mouth!.Image = formFile;
-                }
-                else if (part.PartType == PartType.Eyes)
-                {
-                    innogotchiDto.Eyes = partDto;
-                    innogotchiDto.Eyes!.Image = formFile;
-                }
-            };
-        }
     }
 }

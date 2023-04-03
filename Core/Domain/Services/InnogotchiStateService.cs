@@ -12,14 +12,14 @@ public class InnogotchiStateService : IInnogotchiStateService
         _stateRepository = stateRepository;
     }
 
-    public async Task DrinkAsync(string name)
+    public async Task<bool> DrinkAsync(string name)
     {
-        await _stateRepository.DrinkAsync(name);
+        return await _stateRepository.DrinkAsync(name);
     }
 
-    public async Task FeedAsync(string name)
+    public async Task<bool> FeedAsync(string name)
     {
-        await _stateRepository.FeedAsync(name);
+        return await _stateRepository.FeedAsync(name);
     }
 
     public async Task IncreaseAgeAsync()

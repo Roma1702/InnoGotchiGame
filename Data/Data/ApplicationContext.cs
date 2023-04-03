@@ -1,10 +1,9 @@
-﻿using Entities.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Entities.Entity;
+using Entities.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Entities.Entity;
 using System.Reflection;
-using Contracts.Entity;
 
 namespace DataAccessLayer.Data
 {
@@ -21,7 +20,6 @@ namespace DataAccessLayer.Data
         public DbSet<Innogotchi>? Pets { get; set; }
         public DbSet<InnogotchiPart>? InnogotchiParts { get; set; }
         public DbSet<InnogotchiState>? InnogotchiStates { get; set; }
-        public DbSet<MealTime>? MealTimes { get; set; }
         public DbSet<UserFriend>? UserFriends { get; set; }
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {

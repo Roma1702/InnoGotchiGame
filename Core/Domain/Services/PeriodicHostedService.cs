@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Core.Abstraction.Interfaces;
+using DataAccessLayer.Abstraction.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -42,7 +44,7 @@ public class PeriodicHostedService : BackgroundService
             }
         }
     }
-
+    
     private async Task IncreaseInnogotchiState(InnogotchiStateService stateService)
     {
         await stateService.IncreaseAgeAsync();

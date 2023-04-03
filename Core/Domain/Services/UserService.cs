@@ -26,7 +26,7 @@ public class UserService : IUserService
         _shortUserValidator = shortUserValidator;
     }
 
-    public async Task UpdatePasswordAsync(Guid id, ChangePasswordDto changePasswordDto)
+    public async Task<bool> UpdatePasswordAsync(Guid id, ChangePasswordDto changePasswordDto)
     {
         var passwordModel = await _passwordValidator.ValidateAsync(changePasswordDto);
 
@@ -34,6 +34,8 @@ public class UserService : IUserService
         {
             await _userRepository.UpdatePasswordAsync(id, changePasswordDto);
         }
+
+        return passwordModel.IsValid;
     }
 
     public async Task DeleteAsync(Guid id)
@@ -55,16 +57,16 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task<IEnumerable<ShortUserDto>?> GetChunkAsync(Guid userId, int number, int size)
+    public async Task<IEnumerable<ShortUserDto>?> GetRequestsAsync(Guid userId)
     {
         var requests = await _userFriendRepository.GetRequestsId(userId);
 
-        var users = await _userRepository.GetChunkAsync(requests!, number, size);
+        var users = await _userRepository.GetRequestsAsync(requests!);
 
         return users;
     }
 
-    public async Task SignUpAsync(UserDto userDto)
+    public async Task<bool> SignUpAsync(UserDto userDto)
     {
         var user = await _userValidator.ValidateAsync(userDto);
 
@@ -72,21 +74,20 @@ public class UserService : IUserService
         {
             await _userRepository.CreateAsync(userDto);
         }
+
+        return user.IsValid;
     }
 
-    public async Task UpdateAsync(Guid id, ShortUserDto userDto)
+    public async Task<bool> UpdateAsync(ShortUserDto userDto)
     {
-        var result = await _userRepository.GetByIdAsync(id);
+        var user = await _shortUserValidator.ValidateAsync(userDto);
 
-        if (result is not null)
+        if (user.IsValid)
         {
-            var user = await _shortUserValidator.ValidateAsync(userDto);
-
-            if (user.IsValid)
-            {
-                await _userRepository.UpdateAsync(id ,userDto);
-            }
+            await _userRepository.UpdateAsync(userDto);
         }
+
+        return user.IsValid;
     }
     public async Task InviteAsync(Guid userId, string friendName)
     {

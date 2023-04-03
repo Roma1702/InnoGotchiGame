@@ -13,8 +13,5 @@ public class InnogotchiStateConfiguration : IEntityTypeConfiguration<InnogotchiS
             .HasDefaultValue(HungerLevel.Normal);
         builder.Property(x => x.Thirsty)
             .HasDefaultValue(ThirstyLevel.Normal);
-        builder.HasMany(x => x.MealTimes)
-            .WithOne(x => x.InnogotchiState)
-            .HasForeignKey(x => x.InnogotchiStateId);
     }
 }

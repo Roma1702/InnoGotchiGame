@@ -1,5 +1,4 @@
-﻿using Contracts.Entity;
-using DataAccessLayer.Abstraction.Interfaces;
+﻿using DataAccessLayer.Abstraction.Interfaces;
 using DataAccessLayer.Data;
 using Entities.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -12,63 +11,57 @@ public class InnogotchiStateRepository : IInnogotchiStateRepository
     private readonly ApplicationContext _context;
     private readonly DbSet<InnogotchiState> _dbSetState;
     private readonly DbSet<Innogotchi> _dbSetPets;
-    private readonly DbSet<MealTime> _dbSetMeals;
     public InnogotchiStateRepository(ApplicationContext context)
     {
         _context = context;
         _dbSetState = context.Set<InnogotchiState>();
         _dbSetPets = context.Set<Innogotchi>();
-        _dbSetMeals = context.Set<MealTime>();
     }
 
-    public async Task DrinkAsync(string name)
+    public async Task<bool> DrinkAsync(string name)
     {
         var innogotchi = await _dbSetPets.FirstOrDefaultAsync(x => x.Name == name);
 
-        if (innogotchi!.InnogotchiState!.Thirsty != ThirstyLevel.Full)
+        if (innogotchi!.InnogotchiState!.Thirsty != ThirstyLevel.Full &&
+            innogotchi!.InnogotchiState!.Thirsty != ThirstyLevel.Dead &&
+            innogotchi!.InnogotchiState!.Hunger != HungerLevel.Dead)
         {
             innogotchi!.InnogotchiState!.Thirsty -= 1;
+            innogotchi!.InnogotchiState!.CountOfDrinks += 1;
 
             innogotchi!.InnogotchiState.StartOfHappinessDays = (innogotchi.InnogotchiState.Thirsty >= ThirstyLevel.Normal
                 && innogotchi.InnogotchiState.Hunger >= HungerLevel.Normal)
                 ? DateTimeOffset.Now : innogotchi!.InnogotchiState.StartOfHappinessDays;
 
-            MealTime drinking = new()
-            {
-                InnogotchiStateId = innogotchi.InnogotchiState.Id,
-                Time = DateTimeOffset.Now,
-                MealType = MealType.Drinking,
-            };
+            await _context.SaveChangesAsync();
 
-            await _dbSetMeals.AddAsync(drinking);
+            return true;
         }
 
-        await _context.SaveChangesAsync();
+        return false;
     }
 
-    public async Task FeedAsync(string name)
+    public async Task<bool> FeedAsync(string name)
     {
         var innogotchi = await _dbSetPets.FirstOrDefaultAsync(x => x.Name == name);
 
-        if (innogotchi!.InnogotchiState!.Hunger != HungerLevel.Full)
+        if (innogotchi!.InnogotchiState!.Hunger != HungerLevel.Full && 
+            innogotchi!.InnogotchiState!.Hunger != HungerLevel.Dead &&
+            innogotchi!.InnogotchiState!.Thirsty != ThirstyLevel.Dead)
         {
             innogotchi!.InnogotchiState!.Hunger -= 1;
+            innogotchi!.InnogotchiState!.CountOfFeeds += 1;
 
             innogotchi!.InnogotchiState.StartOfHappinessDays = (innogotchi.InnogotchiState.Thirsty >= ThirstyLevel.Normal
                 && innogotchi.InnogotchiState.Hunger >= HungerLevel.Normal)
                 ? DateTimeOffset.Now : innogotchi!.InnogotchiState.StartOfHappinessDays;
 
-            MealTime feeding = new()
-            {
-                InnogotchiStateId = innogotchi.InnogotchiState.Id,
-                Time = DateTimeOffset.Now,
-                MealType = MealType.Feeding
-            };
+            await _context.SaveChangesAsync();
 
-            await _dbSetMeals.AddAsync(feeding);
+            return true;
         }
 
-        await _context.SaveChangesAsync();
+        return false;
     }
 
     public async Task IncreaseAgeAsync()

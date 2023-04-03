@@ -11,14 +11,17 @@ public class FarmService : IFarmService
     private readonly IFarmRepository _farmRepository;
     private readonly IUserFriendRepository _userFriendRepository;
     private readonly IValidator<FarmDto> _validator;
+    private readonly IUserRepository _userRepository;
 
     public FarmService(IFarmRepository farmRepository,
         IUserFriendRepository userFriendRepository,
-        IValidator<FarmDto> validator)
+        IValidator<FarmDto> validator,
+        IUserRepository userRepository)
     {
         _farmRepository = farmRepository;
         _userFriendRepository = userFriendRepository;
         _validator = validator;
+        _userRepository = userRepository;
     }
     public async Task CreateAsync(Guid userId, FarmDto farmDto)
     {
@@ -49,11 +52,11 @@ public class FarmService : IFarmService
         return farm ?? null;
     }
 
-    public async Task<IEnumerable<FarmDto>?> GetChunkAsync(Guid id, int number, int size)
+    public async Task<IEnumerable<FarmDto>?> GetFarmsAsync(Guid id)
     {
         var userFriends = await _userFriendRepository.GetFriendsId(id);
 
-        var farms = await _farmRepository.GetChunkAsync(userFriends!, number, size);
+        var farms = await _farmRepository.GetFarmsAsync(userFriends!);
 
         return farms ?? null;
     }
@@ -70,6 +73,14 @@ public class FarmService : IFarmService
 
     public async Task<FarmStatisticDto?> GetFarmStatistic(Guid userId)
     {
+        var userDto = await _userRepository.GetByIdAsync(userId);
+        var user = await _userRepository.GetUserAsync(userDto!);
+
+        if (user!.Farm is null || user!.Farm?.Pets?.Count == 0)
+        {
+            return new FarmStatisticDto();
+        }
+
         var farmStatistic = await HandleFarmStatistic(userId);
 
         return farmStatistic;

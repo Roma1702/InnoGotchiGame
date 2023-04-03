@@ -24,8 +24,30 @@ public class InnogotchiController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("chunk")]
-    public async Task<IEnumerable<PetInfoDto>?> GetChunkAsync(int number = 0, int size = 15)
+    [HttpGet("{filter}/{number}/{size}")]
+    public async Task<IEnumerable<PetInfoDto>?> GetFilterChunkAsync(int number, int size, string filter)
+    {
+        Dictionary<string, Func<Task<IEnumerable<PetInfoDto>?>>> dictFilters = new();
+        var userId = _identityService.GetUserIdentity();
+
+        dictFilters.Add("happyDays", new Func<Task<IEnumerable<PetInfoDto>?>>(async () => await _innogotchiService
+            .SortByHappinessDays(Guid.Parse(userId), number, size)));
+
+        dictFilters.Add("age", new Func<Task<IEnumerable<PetInfoDto>?>>(async () => await _innogotchiService
+            .SortByAgeAsync(Guid.Parse(userId), number, size)));
+
+        dictFilters.Add("hunger", new Func<Task<IEnumerable<PetInfoDto>?>>(async () => await _innogotchiService
+            .SortByHungerLevelAsync(Guid.Parse(userId), number, size)));
+
+        dictFilters.Add("thirsty", new Func<Task<IEnumerable<PetInfoDto>?>>(async () => await _innogotchiService
+            .SortByWaterLevelAsync(Guid.Parse(userId), number, size)));
+
+        return await dictFilters[filter]();
+    }
+
+    [Authorize]
+    [HttpGet("{number}/{size}")]
+    public async Task<IEnumerable<InnogotchiDto>?> GetChunkAsync(int number, int size)
     {
         var userId = _identityService.GetUserIdentity();
 
@@ -33,39 +55,30 @@ public class InnogotchiController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("sortByAge")]
-    public async Task<IEnumerable<PetInfoDto>?> SortByAgeAsync(int number = 0, int size = 15)
+    [HttpGet("count")]
+    public async Task<int> GetCountAsync()
     {
         var userId = _identityService.GetUserIdentity();
 
-        return await _innogotchiService.SortByAgeAsync(Guid.Parse(userId), number, size);
+        return await _innogotchiService.GetCountAsync(Guid.Parse(userId));
     }
 
     [Authorize]
-    [HttpGet("sortByHunger")]
-    public async Task<IEnumerable<PetInfoDto>?> SortByHungerLevelAsync(int number = 0, int size = 15)
-    {
-        var userId = _identityService.GetUserIdentity();
-
-        return await _innogotchiService.SortByHungerLevelAsync(Guid.Parse(userId), number, size);
-    }
-
-    [Authorize]
-    [HttpGet("sortByThirsty")]
-    public async Task<IEnumerable<PetInfoDto>?> SortByWaterLevelAsync(int number = 0, int size = 15)
-    {
-        var userId = _identityService.GetUserIdentity();
-
-        return await _innogotchiService.SortByWaterLevelAsync(Guid.Parse(userId), number, size);
-    }
-
-    [Authorize]
-    [HttpGet]
+    [HttpGet("{name}")]
     public async Task<InnogotchiDto?> GetByNameAsync(string name)
     {
         var userId = _identityService.GetUserIdentity();
 
         return await _innogotchiService.GetByNameAsync(Guid.Parse(userId), name);
+    }
+
+    [Authorize]
+    [HttpGet("state/{name}")]
+    public async Task<PetInfoDto?> GetStateByNameAsync(string name)
+    {
+        var userId = _identityService.GetUserIdentity();
+
+        return await _innogotchiService.GetStateByNameAsync(Guid.Parse(userId), name);
     }
 
     [Authorize]
@@ -81,7 +94,7 @@ public class InnogotchiController : ControllerBase
 
     [Authorize]
     [HttpPut]
-    public async Task<IActionResult> UpdateAsync(InnogotchiDto innogotchiDto)
+    public async Task<IActionResult> UpdateAsync([FromForm] InnogotchiDto innogotchiDto)
     {
         await _innogotchiService.UpdateAsync(innogotchiDto);
 
@@ -89,21 +102,21 @@ public class InnogotchiController : ControllerBase
     }
 
     [Authorize]
-    [HttpPut("feed")]
-    public async Task FeedAsync(string name)
+    [HttpPut("feed/{name}")]
+    public async Task<bool> FeedAsync(string name)
     {
-        await _innogotchiStateService.FeedAsync(name);
+        return await _innogotchiStateService.FeedAsync(name);
     }
 
     [Authorize]
-    [HttpPut("drink")]
-    public async Task DrinkAsync(string name)
+    [HttpPut("drink/{name}")]
+    public async Task<bool> DrinkAsync(string name)
     {
-        await _innogotchiStateService.DrinkAsync(name);
+        return await _innogotchiStateService.DrinkAsync(name);
     }
 
     [Authorize]
-    [HttpDelete]
+    [HttpDelete("{name}")]
     public async Task DeleteAsync(string name)
     {
         await _innogotchiService.DeleteAsync(name);

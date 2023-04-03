@@ -2,7 +2,6 @@
 using DataAccessLayer.Abstraction.Interfaces;
 using DataAccessLayer.Data;
 using Entities.Identity;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Models.Core;
@@ -38,15 +37,6 @@ public class UserRepository : IUserRepository
 
             user.SecurityStamp = Guid.NewGuid().ToString("D");
 
-            byte[]? imageData = null;
-
-            using (var binaryReader = new BinaryReader(userDto.ProfilePhoto!.OpenReadStream()))
-            {
-                imageData = binaryReader.ReadBytes((int)userDto.ProfilePhoto.Length);
-            }
-
-            user.ProfilePhoto = imageData;
-
             await _userManager.CreateAsync(user, userDto.Password);
         }
     }
@@ -71,23 +61,6 @@ public class UserRepository : IUserRepository
 
         var userDto = _mapper.Map<ShortUserDto>(user);
 
-        using (var stream = new MemoryStream(user!.ProfilePhoto!))
-        {
-            var formFile = new FormFile(stream, 0, user!.ProfilePhoto!.Length, "photo", "fileName")
-            {
-                Headers = new HeaderDictionary(),
-                ContentType = "application/json"
-            };
-
-            System.Net.Mime.ContentDisposition cd = new()
-            {
-                FileName = formFile.FileName
-            };
-            formFile.ContentDisposition = cd.ToString();
-
-            userDto.ProfilePhoto = formFile;
-        };
-
         return userDto;
     }
 
@@ -99,33 +72,14 @@ public class UserRepository : IUserRepository
 
         var userDto = _mapper.Map<ShortUserDto>(user);
 
-        using (var stream = new MemoryStream(user!.ProfilePhoto!))
-        {
-            var formFile = new FormFile(stream, 0, user!.ProfilePhoto!.Length, "photo", "fileName")
-            {
-                Headers = new HeaderDictionary(),
-                ContentType = "application/json"
-            };
-
-            System.Net.Mime.ContentDisposition cd = new()
-            {
-                FileName = formFile.FileName
-            };
-            formFile.ContentDisposition = cd.ToString();
-
-            userDto.ProfilePhoto = formFile;
-        };
-
         return userDto;
     }
 
-    public async Task<IEnumerable<ShortUserDto>?> GetChunkAsync(IEnumerable<Guid> requestsId, int number, int size)
+    public async Task<IEnumerable<ShortUserDto>?> GetRequestsAsync(IEnumerable<Guid> requestsId)
     {
         var users = await _dbSet.AsNoTracking()
             .Include(x => x.Farm)
             .Where(x => requestsId.Any(c => c == x.Id))
-            .Skip(number * size)
-            .Take(size)
             .ToListAsync();
 
         if (users is null) return null;
@@ -135,24 +89,19 @@ public class UserRepository : IUserRepository
         return userDto;
     }
 
-    public async Task UpdateAsync(Guid id, ShortUserDto userDto)
+    public async Task UpdateAsync(ShortUserDto userDto)
     {
-        var mapUser = _mapper.Map<User>(userDto);
-
-        var user = await _dbSet.FindAsync(id);
+        var user = await _userManager.FindByEmailAsync(userDto.Email);
 
         if (user is not null)
         {
-            user.UserName = mapUser.UserName;
+            user.UserName = $"{userDto.Name} {userDto.Surname}";
 
-            byte[]? imageData = null;
+            user.ProfilePhoto = Convert.FromBase64String(userDto.ProfilePhoto!);
 
-            using (var binaryReader = new BinaryReader(userDto.ProfilePhoto!.OpenReadStream()))
-            {
-                imageData = binaryReader.ReadBytes((int)userDto.ProfilePhoto.Length);
-            }
+            user.FileExtension = userDto.FileExtension;
 
-            user.ProfilePhoto = imageData;
+            user.SecurityStamp = Guid.NewGuid().ToString("D");
 
             await _userManager.UpdateAsync(user);
         }

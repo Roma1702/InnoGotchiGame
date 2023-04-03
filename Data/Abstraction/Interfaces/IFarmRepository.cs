@@ -10,7 +10,7 @@ public interface IFarmRepository
     public Task<double> GetAverageDrinkPeriodAsync(Guid userId);
     public Task<double> GetAverageHappinessDaysCount(Guid userId);
     public Task<double> GetAverageAgeAsync(Guid userId);
-    public Task<IEnumerable<FarmDto>?> GetChunkAsync(IEnumerable<Guid> userFriends, int number, int size);
+    public Task<IEnumerable<FarmDto>?> GetFarmsAsync(IEnumerable<Guid> userFriends);
     public Task<FarmDto?> GetByNameAsync(string name);
     public Task<FarmDto?> GetByIdAsync(Guid userId);
     public Task CreateAsync(Guid userId, FarmDto farmDto);

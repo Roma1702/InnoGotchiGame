@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using static Contracts.Enum.Enums;
 
 namespace Models.Core;
 
 public class MediaDto
 {
-    public IFormFile? Image { get; set; }
+    public string? Image { get; set; }
+    public string? FileExtension { get; set; }
+    public PartType? PartType { get; set; }
 }

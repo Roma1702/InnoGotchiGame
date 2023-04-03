@@ -5,7 +5,7 @@ namespace Core.Abstraction.Interfaces;
 
 public interface IFarmService
 {
-    public Task<IEnumerable<FarmDto>?> GetChunkAsync(Guid id, int number, int size);
+    public Task<IEnumerable<FarmDto>?> GetFarmsAsync(Guid id);
     public Task<FarmDto?> GetByNameAsync(string name);
     public Task<FarmDto?> GetByIdAsync(Guid userId);
     public Task<FarmStatisticDto?> GetFarmStatistic(Guid userId);

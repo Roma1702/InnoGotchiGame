@@ -49,11 +49,47 @@ public class InnogotchiService : IInnogotchiService
         return innogotchi;
     }
 
-    public async Task<IEnumerable<PetInfoDto>?> GetChunkAsync(Guid userId, int number, int size)
+    public async Task<PetInfoDto?> GetStateByNameAsync(Guid userId, string name)
     {
         var user = await GetOwnerAsync(userId);
 
+        var innogotchi = await _innogotchiRepository.GetStateByNameAsync(user!.Farm!.Id, name);
+
+        return innogotchi;
+    }
+
+    public async Task<int> GetCountAsync(Guid userId)
+    {
+        var user = await GetOwnerAsync(userId);
+
+        if (user!.Farm is null)
+        {
+            return 0;
+        }
+
+        var count = await _innogotchiRepository.GetCountAsync(user!.Farm!.Id);
+
+        return count;
+    }
+
+    public async Task<IEnumerable<InnogotchiDto>?> GetChunkAsync(Guid userId, int number, int size)
+    {
+        var user = await GetOwnerAsync(userId);
+
+        if (user!.Farm is null) return null;
+
         var pets = await _innogotchiRepository.GetChunkAsync(user!.Farm!.Id, number, size);
+
+        return pets;
+    }
+
+    public async Task<IEnumerable<PetInfoDto>?> SortByHappinessDays(Guid userId, int number, int size)
+    {
+        var user = await GetOwnerAsync(userId);
+
+        if (user!.Farm is null) return null;
+
+        var pets = await _innogotchiRepository.SortByHappinessDays(user!.Farm!.Id, number, size);
 
         return pets;
     }
@@ -61,6 +97,8 @@ public class InnogotchiService : IInnogotchiService
     public async Task<IEnumerable<PetInfoDto>?> SortByAgeAsync(Guid userId, int number, int size)
     {
         var user = await GetOwnerAsync(userId);
+
+        if (user!.Farm is null) return null;
 
         var pets = await _innogotchiRepository.SortByAgeAsync(user!.Farm!.Id, number, size);
 
@@ -71,6 +109,8 @@ public class InnogotchiService : IInnogotchiService
     {
         var user = await GetOwnerAsync(userId);
 
+        if (user!.Farm is null) return null;
+
         var pets = await _innogotchiRepository.SortByHungerLevelAsync(user!.Farm!.Id, number, size);
 
         return pets;
@@ -79,6 +119,8 @@ public class InnogotchiService : IInnogotchiService
     public async Task<IEnumerable<PetInfoDto>?> SortByWaterLevelAsync(Guid userId, int number, int size)
     {
         var user = await GetOwnerAsync(userId);
+
+        if (user!.Farm is null) return null;
 
         var pets = await _innogotchiRepository.SortByWaterLevelAsync(user!.Farm!.Id, number, size);
 

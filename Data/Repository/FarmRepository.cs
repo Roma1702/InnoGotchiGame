@@ -69,11 +69,9 @@ public class FarmRepository : IFarmRepository
         return farmDto;
     }
 
-    public async Task<IEnumerable<FarmDto>?> GetChunkAsync(IEnumerable<Guid> userFriends, int number, int size)
+    public async Task<IEnumerable<FarmDto>?> GetFarmsAsync(IEnumerable<Guid> userFriends)
     {
         var farms = await _dbSetFarms.Where(x => userFriends.Any(c => c == x.UserId))
-            .Skip(number * size)
-            .Take(size)
             .ToListAsync();
 
         if (farms is null) return null;
@@ -101,64 +99,82 @@ public class FarmRepository : IFarmRepository
     {
         var ownFarm = await GetFarmAsync(userId);
 
-        var count = ownFarm!.Pets!.Count(x => x.InnogotchiState!.Hunger != HungerLevel.Dead
-            && x.InnogotchiState.Thirsty != ThirstyLevel.Dead);
+        var count = ownFarm?.Pets!.Count(x => x.InnogotchiState!.Hunger != HungerLevel.Dead
+        && x.InnogotchiState.Thirsty != ThirstyLevel.Dead);
 
-        return count;
+        return count ?? 0;
     }
 
     public async Task<int> GetCountOfDeadAsync(Guid userId)
     {
         var ownFarm = await GetFarmAsync(userId);
 
-        var count = ownFarm!.Pets!.Count(x => x.InnogotchiState!.Hunger == HungerLevel.Dead
-            && x.InnogotchiState.Thirsty == ThirstyLevel.Dead);
+        var count = ownFarm?.Pets!.Count(x => x.InnogotchiState!.Hunger == HungerLevel.Dead
+            || x.InnogotchiState.Thirsty == ThirstyLevel.Dead);
 
-        return count;
+        return count ?? 0;
     }
 
     public async Task<double> GetAverageFeedPeriodAsync(Guid userId)
     {
         var ownFarm = await GetFarmAsync(userId);
 
-        var pets = ownFarm!.Pets!;
+        var pets = ownFarm?.Pets;
 
-        var feedingDates = GetAverageMealPeriodAsync(pets, MealType.Feeding);
+        if (pets is null) return 0;
 
-        var allAvgPeriod = feedingDates.Count() > 0 ? feedingDates.Average() : 0;
+        double sumOfIntervals = 0;
 
-        return allAvgPeriod;
+        foreach (var item in pets!)
+        {
+            if (item.InnogotchiState!.CountOfFeeds > 0)
+            {
+                sumOfIntervals += (double)(DateTimeOffset.Now - item!.InnogotchiState!.Created).Days
+                                / (double)item.InnogotchiState.CountOfFeeds;
+            }
+        }
+
+        return Math.Round(sumOfIntervals / pets.Count, 1);
     }
 
     public async Task<double> GetAverageDrinkPeriodAsync(Guid userId)
     {
         var ownFarm = await GetFarmAsync(userId);
 
-        var pets = ownFarm!.Pets!;
+        var pets = ownFarm?.Pets;
 
-        var feedingDates = GetAverageMealPeriodAsync(pets, MealType.Drinking);
+        if (pets is null) return 0;
 
-        var allAvgPeriod = feedingDates.Count() > 0 ? feedingDates.Average() : 0;
+        double sumOfIntervals = 0;
 
-        return allAvgPeriod;
+        foreach (var item in pets!)
+        {
+            if (item.InnogotchiState!.CountOfFeeds > 0)
+            {
+                sumOfIntervals += (DateTimeOffset.Now - item!.InnogotchiState!.Created).Days
+                                / item.InnogotchiState.CountOfDrinks;
+            }
+        }
+
+        return Math.Round(sumOfIntervals / pets.Count, 1);
     }
 
     public async Task<double> GetAverageHappinessDaysCount(Guid userId)
     {
         var ownFarm = await GetFarmAsync(userId);
 
-        var avgHappyDays = ownFarm!.Pets!.Average(x => x.InnogotchiState!.HappinessDays);
+        var avgHappyDays = ownFarm?.Pets!.Average(x => x.InnogotchiState!.HappinessDays);
 
-        return Math.Round(avgHappyDays, 1);
+        return Math.Round(avgHappyDays ?? 0, 1);
     }
 
     public async Task<double> GetAverageAgeAsync(Guid userId)
     {
         var ownFarm = await GetFarmAsync(userId);
 
-        var avgHappyDays = ownFarm!.Pets!.Average(x => x.InnogotchiState!.Age);
+        var avgHappyDays = ownFarm?.Pets!.Average(x => x.InnogotchiState!.Age);
 
-        return Math.Round(avgHappyDays, 1);
+        return Math.Round(avgHappyDays ?? 0, 1);
     }
 
     private async Task<Farm?> GetFarmAsync(Guid userId)
@@ -166,35 +182,8 @@ public class FarmRepository : IFarmRepository
         var ownFarm = await _dbSetFarms.AsNoTracking()
             .Include(x => x.Pets!)
             .ThenInclude(x => x.InnogotchiState!)
-            .ThenInclude(x => x.MealTimes)
             .FirstOrDefaultAsync(x => x.UserId == userId);
 
         return ownFarm;
-    }
-
-    private IEnumerable<double> GetAverageMealPeriodAsync(IEnumerable<Innogotchi> pets, MealType mealType)
-    {
-        List<double> feedingDates = new();
-
-        foreach (var item in pets)
-        {
-            double avgPeriod = 0;
-
-            var mealTime = item.InnogotchiState!.MealTimes?
-                .Where(x => x.MealType == mealType)
-                .Select(x => x.Time)
-                .ToList();
-
-            if (mealTime?.Count() > 0)
-            {
-                avgPeriod = Enumerable.Range(1, mealTime.Count() - 1)
-                    .Select(x => (mealTime[x] - mealTime[x - 1]).TotalDays)
-                    .Average();
-            }
-
-            feedingDates.Add(avgPeriod);
-        }
-
-        return feedingDates;
     }
 }

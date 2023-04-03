@@ -23,9 +23,4 @@ public class Enums
         Mouth = 3,
         Nose = 4
     }
-    public enum MealType
-    {
-        Feeding,
-        Drinking
-    }
 }

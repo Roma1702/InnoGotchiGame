@@ -2,8 +2,8 @@
 
 public interface IInnogotchiStateRepository
 {
-    public Task FeedAsync(string name);
-    public Task DrinkAsync(string name);
+    public Task<bool> FeedAsync(string name);
+    public Task<bool> DrinkAsync(string name);
     public Task IncreaseAgeAsync();
     public Task IncreaseHungerLevelAsync();
     public Task IncreaseWaterLevelAsync();

@@ -22,16 +22,16 @@ public class FarmController : ControllerBase
 
     [Authorize]
     [HttpGet("friendsFarms")]
-    public async Task<IEnumerable<FarmDto>?> GetChunkAsync(int number, int size)
+    public async Task<IEnumerable<FarmDto>?> GetFarmsAsync()
     {
         var userId = _identityService.GetUserIdentity();
 
-        return await _farmService.GetChunkAsync(Guid.Parse(userId), number, size);
+        return await _farmService.GetFarmsAsync(Guid.Parse(userId));
     }
 
     [Authorize]
-    [HttpGet("{id}")]
-    public async Task<FarmDto?> GetByIdAsync()
+    [HttpGet]
+    public async Task<FarmDto?> GetOwnFarmAsync()
     {
         var userId = _identityService.GetUserIdentity();
 
@@ -48,7 +48,7 @@ public class FarmController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("name")]
+    [HttpGet("{name}")]
     public async Task<FarmDto?> GetByNameAsync(string name)
     {
         return await _farmService.GetByNameAsync(name);
@@ -56,7 +56,7 @@ public class FarmController : ControllerBase
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> CreateAsync(FarmDto farmDto)
+    public async Task<IActionResult> CreateAsync([FromForm] FarmDto farmDto)
     {
         var userId = _identityService.GetUserIdentity();
 
@@ -72,7 +72,7 @@ public class FarmController : ControllerBase
 
     [Authorize]
     [HttpPut]
-    public async Task<IActionResult> UpdateAsync(FarmDto farmDto)
+    public async Task<IActionResult> UpdateAsync([FromForm] FarmDto farmDto)
     {
         var userId = _identityService.GetUserIdentity();
 

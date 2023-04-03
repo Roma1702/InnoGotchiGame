@@ -1,5 +1,4 @@
-﻿using Contracts.Entity;
-using static Contracts.Enum.Enums;
+﻿using static Contracts.Enum.Enums;
 
 namespace Entities.Entity;
 
@@ -9,7 +8,8 @@ public class InnogotchiState
     public int Age { get; set; }
     public HungerLevel Hunger { get; set; }
     public ThirstyLevel Thirsty { get; set; }
-    public virtual ICollection<MealTime>? MealTimes { get; set; }
+    public int CountOfFeeds { get; set; }
+    public int CountOfDrinks { get; set; }
     public DateTimeOffset StartOfHappinessDays { get; set; }
     public int HappinessDays { get; set; }
     public DateTimeOffset Created { get; set; }

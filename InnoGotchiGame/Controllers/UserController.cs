@@ -19,12 +19,12 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [Authorize]
-    [HttpGet("{id}")]
-    public async Task<ShortUserDto?> GetByIdAsync(Guid id)
-    {
-        return await _userService.GetByIdAsync(id);
-    }
+    //[Authorize]
+    //[HttpGet("{id}")]
+    //public async Task<ShortUserDto?> GetByIdAsync(Guid id)
+    //{
+    //    return await _userService.GetByIdAsync(id);
+    //}
 
     [Authorize]
     [HttpGet]
@@ -36,7 +36,7 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("name")]
+    [HttpGet("{name}")]
     public async Task<ShortUserDto?> GetByNameAsync(string name)
     {
         return await _userService.GetByNameAsync(name);
@@ -44,21 +44,25 @@ public class UserController : ControllerBase
 
     [Authorize]
     [HttpGet("requests")]
-    public async Task<IEnumerable<ShortUserDto>?> GetChunkAsync(int number, int size)
+    public async Task<IEnumerable<ShortUserDto>?> GetRequestsAsync()
     {
         var userId = _identityService.GetUserIdentity();
 
-        return await _userService.GetChunkAsync(Guid.Parse(userId), number, size);
+        return await _userService.GetRequestsAsync(Guid.Parse(userId));
     }
 
-    [HttpPost("register")]
-    public async Task SignUpAsync([FromForm] UserDto userDto)
+    [HttpPost("registration")]
+    public async Task<IActionResult> SignUpAsync([FromForm] UserDto userDto)
     {
-        await _userService.SignUpAsync(userDto);
+       var result =  await _userService.SignUpAsync(userDto);
+
+        if (result) return Ok(result);
+
+        return BadRequest();
     }
 
     [Authorize]
-    [HttpPost("invite")]
+    [HttpPost("invite/{friendName}")]
     public async Task InviteAsync(string friendName)
     {
         var userId = _identityService.GetUserIdentity();
@@ -71,34 +75,30 @@ public class UserController : ControllerBase
 
     [Authorize]
     [HttpPut("changePassword")]
-    public async Task UpdatePasswordAsync(ChangePasswordDto changePasswordDto)
+    public async Task<IActionResult> UpdatePasswordAsync([FromForm] ChangePasswordDto changePasswordDto)
     {
         var userId = _identityService.GetUserIdentity();
 
-        if (userId != string.Empty)
-        {
-            await _userService.UpdatePasswordAsync(Guid.Parse(userId), changePasswordDto);
-        }
+        var result = await _userService.UpdatePasswordAsync(Guid.Parse(userId), changePasswordDto);
+
+        if (result) return Ok(result);
+
+        return BadRequest();
     }
 
     [Authorize]
     [HttpPut]
     public async Task<IActionResult> UpdateAsync([FromForm] ShortUserDto userDto)
     {
-        var userId = _identityService.GetUserIdentity();
+        var result = await _userService.UpdateAsync(userDto);
 
-        if (userId != string.Empty)
-        {
-            await _userService.UpdateAsync(Guid.Parse(userId), userDto);
+        if (result) return Ok(result);
 
-            return Ok(userDto);
-        }
-
-        return BadRequest();
+        return Ok(userDto);
     }
 
     [Authorize]
-    [HttpPut("confirm")]
+    [HttpPut("confirm/{friendName}")]
     public async Task ConfirmAsync(string friendName)
     {
         var userId = _identityService.GetUserIdentity();
@@ -110,7 +110,7 @@ public class UserController : ControllerBase
     }
 
     [Authorize]
-    [HttpDelete("reject")]
+    [HttpDelete("reject/{friendName}")]
     public async Task RejectAsync(string friendName)
     {
         var userId = _identityService.GetUserIdentity();
